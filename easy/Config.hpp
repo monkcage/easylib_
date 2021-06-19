@@ -1,0 +1,7 @@
+#ifndef EASY_CONFIG_INC
+#define EASY_CONFIG_INC
+
+#define EASY_EXPORT
+
+
+#endif // EASY_CONFIG_INC
