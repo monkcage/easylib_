@@ -55,9 +55,9 @@ target_include_directories(
          $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/exports>
   PRIVATE ${PROJECT_SOURCE_DIR}
-          ${PROJECT_SOURCE_DIR}/trantor/utils
-          ${PROJECT_SOURCE_DIR}/trantor/net
-          ${PROJECT_SOURCE_DIR}/trantor/net/inner
+          ${PROJECT_SOURCE_DIR}/easy/utils
+          ${PROJECT_SOURCE_DIR}/easy/net
+          ${PROJECT_SOURCE_DIR}/easy/net/inner
           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third_party/wepoll>)
 
 if(MINGW)
@@ -169,7 +169,7 @@ source_group("Public API"
              ${public_utils_headers})
 
 install(TARGETS easy
-                # IMPORTANT: Add the trantor library to the "export-set"
+                # IMPORTANT: Add the easy library to the "export-set"
         EXPORT EasyTargets
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
@@ -184,8 +184,8 @@ install(FILES ${public_utils_headers}
 include(CMakePackageConfigHelpers)
 # ... for the install tree
 configure_package_config_file(
-  cmake/templates/TrantorConfig.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/TrantorConfig.cmake
+  cmake/templates/EasyConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/EasyConfig.cmake
   INSTALL_DESTINATION
   ${INSTALL_EASY_CMAKE_DIR})
 
@@ -195,7 +195,7 @@ write_basic_package_version_file(
   VERSION ${EASY_VERSION}
   COMPATIBILITY SameMajorVersion)
 
-# Install the TrantorConfig.cmake and TrantorConfigVersion.cmake
+# Install the EasyConfig.cmake and EasyConfigVersion.cmake
 install(
   FILES
     "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/EasyConfig.cmake"
