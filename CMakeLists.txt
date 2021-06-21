@@ -3,6 +3,10 @@ project(easy)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules/)
 
+
+add_definitions(-std=c++11)
+
+
 set(EASY_MAJOR_VERSION 1)
 set(EASY_MINOR_VERSION 4)
 set(EASY_PATCH_VERSION 1)
@@ -67,33 +71,33 @@ if(MINGW)
 endif(MINGW)
 
 set(EASY_SOURCES
-    easy/utils/AsyncFileLogger.cc
-    easy/utils/ConcurrentTaskQueue.cc
-    easy/utils/Date.cc
-    easy/utils/LogStream.cc
-    easy/utils/Logger.cc
-    easy/utils/MsgBuffer.cc
-    easy/utils/SerialTaskQueue.cc
-    easy/utils/TimingWheel.cc
-    easy/net/EventLoop.cc
-    easy/net/EventLoopThread.cc
-    easy/net/EventLoopThreadPool.cc
-    easy/net/InetAddress.cc
-    easy/net/TcpClient.cc
-    easy/net/TcpServer.cc
-    easy/net/Channel.cc
-    easy/net/inner/Acceptor.cc
-    easy/net/inner/Connector.cc
-    easy/net/inner/Poller.cc
-    easy/net/inner/Socket.cc
-    easy/net/inner/TcpConnectionImpl.cc
-    easy/net/inner/Timer.cc
-    easy/net/inner/TimerQueue.cc
-    easy/net/inner/poller/EpollPoller.cc
-    easy/net/inner/poller/KQueue.cc)
+    easy/utils/AsyncFileLogger.cxx
+    easy/utils/ConcurrentTaskQueue.cxx
+    easy/utils/Date.cxx
+    easy/utils/LogStream.cxx
+    easy/utils/Logger.cxx
+    easy/utils/MsgBuffer.cxx
+    easy/utils/SerialTaskQueue.cxx
+    easy/utils/TimingWheel.cxx
+    easy/net/EventLoop.cxx
+    easy/net/EventLoopThread.cxx
+    easy/net/EventLoopThreadPool.cxx
+    easy/net/InetAddress.cxx
+    easy/net/TcpClient.cxx
+    easy/net/TcpServer.cxx
+    easy/net/Channel.cxx
+    easy/net/inner/Acceptor.cxx
+    easy/net/inner/Connector.cxx
+    easy/net/inner/Poller.cxx
+    easy/net/inner/Socket.cxx
+    easy/net/inner/TcpConnectionImpl.cxx
+    easy/net/inner/Timer.cxx
+    easy/net/inner/TimerQueue.cxx
+    easy/net/inner/poller/EpollPoller.cxx
+    easy/net/inner/poller/KQueue.cxx)
 
 if(WIN32)
-  set(EASY_SOURCES ${EASY_SOURCES} easy/utils/WindowsSupport.cc)
+  set(EASY_SOURCES ${EASY_SOURCES} easy/utils/WindowsSupport.cxx)
   set(EASY_SOURCES ${EASY_SOURCES} third_party/wepoll/Wepoll.c)
 endif(WIN32)
 
@@ -103,14 +107,14 @@ if(OpenSSL_FOUND)
   target_compile_definitions(${PROJECT_NAME} PRIVATE USE_OPENSSL)
 endif()
 
-find_package(c-ares)
-if(c-ares_FOUND)
-  message(STATUS "c-ares found!")
-  target_link_libraries(${PROJECT_NAME} PRIVATE c-ares_lib)
-  set(EASY_SOURCES ${EASY_SOURCES} easy/net/inner/AresResolver.cc)
-else()
-  set(EASY_SOURCES ${EASY_SOURCES} easy/net/inner/NormalResolver.cc)
-endif()
+#find_package(c-ares)
+#if(c-ares_FOUND)
+#  message(STATUS "c-ares found!")
+#  target_link_libraries(${PROJECT_NAME} PRIVATE c-ares_lib)
+#  set(EASY_SOURCES ${EASY_SOURCES} easy/net/inner/AresResolver.cc)
+#else()
+  set(EASY_SOURCES ${EASY_SOURCES} easy/net/inner/NormalResolver.cxx)
+#endif()
 target_sources(${PROJECT_NAME} PRIVATE ${EASY_SOURCES})
 
 find_package(Threads)
@@ -181,28 +185,28 @@ install(FILES ${public_net_headers}
 install(FILES ${public_utils_headers}
         DESTINATION ${INSTALL_INCLUDE_DIR}/easy/utils)
 
-include(CMakePackageConfigHelpers)
+#include(CMakePackageConfigHelpers)
 # ... for the install tree
-configure_package_config_file(
-  cmake/templates/EasyConfig.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/EasyConfig.cmake
-  INSTALL_DESTINATION
-  ${INSTALL_EASY_CMAKE_DIR})
+#configure_package_config_file(
+#  cmake/templates/EasyConfig.cmake.in
+#  ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/EasyConfig.cmake
+#  INSTALL_DESTINATION
+#  ${INSTALL_EASY_CMAKE_DIR})
 
 # version
-write_basic_package_version_file(
-  ${CMAKE_CURRENT_BINARY_DIR}/EasyConfigVersion.cmake
-  VERSION ${EASY_VERSION}
-  COMPATIBILITY SameMajorVersion)
+#write_basic_package_version_file(
+#  ${CMAKE_CURRENT_BINARY_DIR}/EasyConfigVersion.cmake
+#  VERSION ${EASY_VERSION}
+#  COMPATIBILITY SameMajorVersion)
 
 # Install the EasyConfig.cmake and EasyConfigVersion.cmake
-install(
-  FILES
-    "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/EasyConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/EasyConfigVersion.cmake"
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/Findc-ares.cmake"
-  DESTINATION "${INSTALL_EASY_CMAKE_DIR}"
-  COMPONENT dev)
+#install(
+#  FILES
+#    "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/EasyConfig.cmake"
+#    "${CMAKE_CURRENT_BINARY_DIR}/EasyConfigVersion.cmake"
+#    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/Findc-ares.cmake"
+#  DESTINATION "${INSTALL_EASY_CMAKE_DIR}"
+#  COMPONENT dev)
 
 # Install the export set for use with the install-tree
 install(EXPORT EasyTargets

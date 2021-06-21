@@ -83,13 +83,14 @@ class MpscQueue : public NonCopyable
   private:
     struct BufferNode
     {
-        BufferNode() = default;
+        BufferNode() noexcept = default;
         BufferNode(const T &data) : dataPtr_(new T(data))
         {
         }
         BufferNode(T &&data) : dataPtr_(new T(std::move(data)))
         {
         }
+        ~BufferNode() {}
         T *dataPtr_;
         std::atomic<BufferNode *> next_{nullptr};
     };
