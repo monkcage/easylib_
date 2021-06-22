@@ -23,7 +23,8 @@ class SSLContext;
  */
 class EASY_EXPORT TcpServer : NonCopyable
 {
-  public:
+    using ThreadInitCB = std::function<void(EventLoop*)>;
+public:
     /**
      * @brief Construct a new TCP server instance.
      *
@@ -45,7 +46,7 @@ class EASY_EXPORT TcpServer : NonCopyable
      * @brief Start the server.
      *
      */
-    void start();
+    void start(ThreadInitCB const& cb=ThreadInitCB());
 
     /**
      * @brief Stop the server.
@@ -63,7 +64,7 @@ class EASY_EXPORT TcpServer : NonCopyable
     {
         assert(!started_);
         loopPoolPtr_ = std::make_shared<EventLoopThreadPool>(num);
-        loopPoolPtr_->start();
+        //loopPoolPtr_->start();
     }
 
     /**

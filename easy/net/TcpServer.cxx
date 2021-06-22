@@ -95,8 +95,11 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peer)
     newPtr->connectEstablished();
 }
 
-void TcpServer::start()
+void TcpServer::start(ThreadInitCB const& cb)
 {
+    if(loopPoolPtr_)
+        loopPoolPtr_->start(cb);
+
     loop_->runInLoop([this]() {
         assert(!started_);
         started_ = true;

@@ -4,25 +4,26 @@ using namespace easy;
 EventLoopThreadPool::EventLoopThreadPool(size_t threadNum,
                                          const std::string &name)
     : loopIndex_(0)
+    , name_(name)
+    , threadNum_(threadNum)
 {
-    for (size_t i = 0; i < threadNum; ++i)
-    {
-        loopThreadVector_.emplace_back(std::make_shared<EventLoopThread>(name));
-    }
+    // for (size_t i = 0; i < threadNum; ++i)
+    // {
+    //     loopThreadVector_.emplace_back(std::make_shared<EventLoopThread>(name));
+    // }
 }
-void EventLoopThreadPool::start()
+
+
+void EventLoopThreadPool::start(ThreadInitCB const& cb)
 {
     for (unsigned int i = 0; i < loopThreadVector_.size(); ++i)
     {
+        loopThreadVector_.emplace_back(std::make_shared<EventLoopThread>(name_, cb));
         loopThreadVector_[i]->run();
     }
 }
-// void EventLoopThreadPool::stop(){
-//    for(unsigned int i=0;i<loopThreadVector_.size();i++)
-//    {
-//        loopThreadVector_[i].stop();
-//    }
-//}
+
+
 void EventLoopThreadPool::wait()
 {
     for (unsigned int i = 0; i < loopThreadVector_.size(); ++i)

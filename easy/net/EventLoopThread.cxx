@@ -7,15 +7,22 @@
 #include <sys/prctl.h>
 #endif
 
-using namespace easy;
-EventLoopThread::EventLoopThread(const std::string &threadName)
-    : loop_(nullptr),
-      loopThreadName_(threadName),
-      thread_([this]() { loopFuncs(); })
+
+namespace easy {
+
+
+EventLoopThread::EventLoopThread(const std::string &threadName, ThreadInitCB const& cb)
+    : loop_(nullptr)
+    , loopThreadName_(threadName)
+    , thread_([this]() { loopFuncs(); })
+    , initCB_(cb)
 {
     auto f = promiseForLoopPointer_.get_future();
     loop_ = f.get();
 }
+
+
+
 EventLoopThread::~EventLoopThread()
 {
     run();
@@ -28,20 +35,25 @@ EventLoopThread::~EventLoopThread()
         thread_.join();
     }
 }
-// void EventLoopThread::stop() {
-//    if(loop_)
-//        loop_->quit();
-//}
+
+
 void EventLoopThread::wait()
 {
     thread_.join();
 }
+
+
 void EventLoopThread::loopFuncs()
 {
 #ifdef __linux__
     ::prctl(PR_SET_NAME, loopThreadName_.c_str());
 #endif
+
     EventLoop loop;
+
+    if(initCB_)
+        initCB_(&loop);
+
     loop.queueInLoop([this]() { promiseForLoop_.set_value(1); });
     promiseForLoopPointer_.set_value(&loop);
     auto f = promiseForRun_.get_future();
@@ -50,6 +62,8 @@ void EventLoopThread::loopFuncs()
     // LOG_DEBUG << "loop out";
     loop_ = NULL;
 }
+
+
 void EventLoopThread::run()
 {
     std::call_once(once_, [this]() {
@@ -59,3 +73,6 @@ void EventLoopThread::run()
         (void)f.get();
     });
 }
+
+
+} // namespace easy

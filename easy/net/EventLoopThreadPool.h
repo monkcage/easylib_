@@ -15,7 +15,8 @@ namespace easy
  */
 class EASY_EXPORT EventLoopThreadPool : NonCopyable
 {
-  public:
+    using ThreadInitCB = std::function<void(EventLoop*)>;
+public:
     EventLoopThreadPool() = delete;
 
     /**
@@ -31,7 +32,7 @@ class EASY_EXPORT EventLoopThreadPool : NonCopyable
      * @brief Run all event loops in the pool.
      * @note This function doesn't block the current thread.
      */
-    void start();
+    void start(ThreadInitCB const& cb=ThreadInitCB());
 
     /**
      * @brief Wait for all event loops in the pool to quit.
@@ -76,5 +77,7 @@ class EASY_EXPORT EventLoopThreadPool : NonCopyable
   private:
     std::vector<std::shared_ptr<EventLoopThread>> loopThreadVector_;
     size_t loopIndex_;
+    std::string const name_;
+    uint32_t threadNum_;
 };
 }  // namespace easy

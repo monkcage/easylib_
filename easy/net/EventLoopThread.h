@@ -19,8 +19,12 @@ namespace easy
  */
 class EASY_EXPORT EventLoopThread : NonCopyable
 {
-  public:
-    explicit EventLoopThread(const std::string &threadName = "EventLoopThread");
+    using ThreadInitCB = std::function<void(EventLoop*)>;
+public:
+    
+
+    explicit EventLoopThread(const std::string &threadName = "EventLoopThread", ThreadInitCB const& cb = ThreadInitCB());
+    
     ~EventLoopThread();
 
     /**
@@ -55,6 +59,7 @@ class EASY_EXPORT EventLoopThread : NonCopyable
     std::promise<int> promiseForLoop_;
     std::once_flag once_;
     std::thread thread_;
+    ThreadInitCB initCB_;
 };
 
 }  // namespace easy
