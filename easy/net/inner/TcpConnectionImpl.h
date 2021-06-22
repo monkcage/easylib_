@@ -37,7 +37,7 @@ std::shared_ptr<SSLContext> newSSLServerContext(const std::string &certPath,
 class Channel;
 class Socket;
 class TcpServer;
-void removeConnection(EventLoop *loop, const TcpConnectionPtr &conn);
+void removeConnection(EventLoop *loop, std::shared_ptr<TcpConnection> const& conn);
 class TcpConnectionImpl : public TcpConnection,
                           public NonCopyable,
                           public std::enable_shared_from_this<TcpConnectionImpl>
@@ -45,7 +45,7 @@ class TcpConnectionImpl : public TcpConnection,
     friend class TcpServer;
     friend class TcpClient;
     friend void easy::removeConnection(EventLoop *loop,
-                                          const TcpConnectionPtr &conn);
+                                       std::shared_ptr<TcpConnection> const& conn);
 
   public:
     class KickoffEntry
@@ -123,7 +123,7 @@ class TcpConnectionImpl : public TcpConnection,
         return &readBuffer_;
     }
     // set callbacks
-    virtual void setHighWaterMarkCallback(const HighWaterMarkCallback &cb,
+    virtual void setHighWaterMarkCallback(std::function<void(std::shared_ptr<TcpConnection> const&, size_t const)> const& cb,
                                           size_t markLen) override
     {
         highWaterMarkCallback_ = cb;
@@ -196,19 +196,19 @@ class TcpConnectionImpl : public TcpConnection,
 #else
     void sendFile(FILE *fp, size_t offset = 0, size_t length = 0);
 #endif
-    void setRecvMsgCallback(const RecvMessageCallback &cb)
+    void setRecvMsgCallback(std::function<void(std::shared_ptr<TcpConnection> const&, MsgBuffer*)> const& cb)
     {
         recvMsgCallback_ = cb;
     }
-    void setConnectionCallback(const ConnectionCallback &cb)
+    void setConnectionCallback(std::function<void(std::shared_ptr<TcpConnection> const&)> const& cb)
     {
         connectionCallback_ = cb;
     }
-    void setWriteCompleteCallback(const WriteCompleteCallback &cb)
+    void setWriteCompleteCallback(std::function<void(std::shared_ptr<TcpConnection> const&)> const& cb)
     {
         writeCompleteCallback_ = cb;
     }
-    void setCloseCallback(const CloseCallback &cb)
+    void setCloseCallback(std::function<void(std::shared_ptr<TcpConnection> const&)> const& cb)
     {
         closeCallback_ = cb;
     }
@@ -262,11 +262,11 @@ class TcpConnectionImpl : public TcpConnection,
     InetAddress localAddr_, peerAddr_;
     ConnStatus status_{ConnStatus::Connecting};
     // callbacks
-    RecvMessageCallback recvMsgCallback_;
-    ConnectionCallback connectionCallback_;
-    CloseCallback closeCallback_;
-    WriteCompleteCallback writeCompleteCallback_;
-    HighWaterMarkCallback highWaterMarkCallback_;
+    std::function<void(std::shared_ptr<TcpConnection> const&, MsgBuffer*)> recvMsgCallback_;
+    std::function<void(std::shared_ptr<TcpConnection> const&)> connectionCallback_;
+    std::function<void(std::shared_ptr<TcpConnection> const&)> closeCallback_;
+    std::function<void(std::shared_ptr<TcpConnection> const&)> writeCompleteCallback_;
+    std::function<void(std::shared_ptr<TcpConnection> const&, size_t const)> highWaterMarkCallback_;
     SSLErrorCallback sslErrorCallback_;
     void handleClose();
     void handleError();

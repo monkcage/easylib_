@@ -17,7 +17,7 @@ TcpServer::TcpServer(EventLoop *loop,
     : loop_(loop),
       acceptorPtr_(new Acceptor(loop, address, reUseAddr, reUsePort)),
       serverName_(name),
-      recvMessageCallback_([](const TcpConnectionPtr &, MsgBuffer *buffer) {
+      recvMessageCallback_([](std::shared_ptr<TcpConnection> const&, MsgBuffer *buffer) {
           LOG_ERROR << "unhandled recv message [" << buffer->readableBytes()
                     << " bytes]";
           buffer->retrieveAll();
@@ -81,14 +81,14 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peer)
     newPtr->setRecvMsgCallback(recvMessageCallback_);
 
     newPtr->setConnectionCallback(
-        [this](const TcpConnectionPtr &connectionPtr) {
+        [this](std::shared_ptr<TcpConnection> const& conn) {
             if (connectionCallback_)
-                connectionCallback_(connectionPtr);
+                connectionCallback_(conn);
         });
     newPtr->setWriteCompleteCallback(
-        [this](const TcpConnectionPtr &connectionPtr) {
+        [this](std::shared_ptr<TcpConnection> const& conn) {
             if (writeCompleteCallback_)
-                writeCompleteCallback_(connectionPtr);
+                writeCompleteCallback_(conn);
         });
     newPtr->setCloseCallback(std::bind(&TcpServer::connectionClosed, this, _1));
     connSet_.insert(newPtr);
@@ -153,7 +153,7 @@ void TcpServer::stop()
         f.get();
     }
 }
-void TcpServer::connectionClosed(const TcpConnectionPtr &connectionPtr)
+void TcpServer::connectionClosed(std::shared_ptr<TcpConnection> const& connectionPtr)
 {
     LOG_TRACE << "connectionClosed";
     // loop_->assertInLoopThread();

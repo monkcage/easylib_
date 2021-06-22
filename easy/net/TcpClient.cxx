@@ -28,7 +28,7 @@ namespace easy
 TcpClient::IgnoreSigPipe TcpClient::initObj;
 #endif
 
-static void defaultConnectionCallback(const TcpConnectionPtr &conn)
+static void defaultConnectionCallback(std::shared_ptr<TcpConnection> const& conn)
 {
     LOG_TRACE << conn->localAddr().toIpPort() << " -> "
               << conn->peerAddr().toIpPort() << " is "
@@ -37,7 +37,7 @@ static void defaultConnectionCallback(const TcpConnectionPtr &conn)
     // message callback only.
 }
 
-static void defaultMessageCallback(const TcpConnectionPtr &, MsgBuffer *buf)
+static void defaultMessageCallback(std::shared_ptr<TcpConnection> const&, MsgBuffer *buf)
 {
     buf->retrieveAll();
 }
@@ -80,7 +80,7 @@ TcpClient::~TcpClient()
         // TODO: not 100% safe, if we are in different thread
         auto loop = loop_;
         loop_->runInLoop([conn, loop]() {
-            conn->setCloseCallback([loop](const TcpConnectionPtr &connPtr) {
+            conn->setCloseCallback([loop](std::shared_ptr<TcpConnection> const& connPtr) {
                 loop->queueInLoop([connPtr]() {
                     static_cast<TcpConnectionImpl *>(connPtr.get())
                         ->connectDestroyed();
@@ -172,7 +172,7 @@ void TcpClient::newConnection(int sockfd)
     conn->connectEstablished();
 }
 
-void TcpClient::removeConnection(const TcpConnectionPtr &conn)
+void TcpClient::removeConnection(std::shared_ptr<TcpConnection> const& conn)
 {
     loop_->assertInLoopThread();
     assert(loop_ == conn->getLoop());

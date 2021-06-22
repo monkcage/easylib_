@@ -98,7 +98,7 @@ class EASY_EXPORT TcpConnection
      * larger than the water mark.
      * @param markLen The water mark in bytes.
      */
-    virtual void setHighWaterMarkCallback(const HighWaterMarkCallback &cb,
+    virtual void setHighWaterMarkCallback(std::function<void(std::shared_ptr<TcpConnection> const&, size_t const)> const& cb,
                                           size_t markLen) = 0;
 
     /**

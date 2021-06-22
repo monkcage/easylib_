@@ -50,12 +50,8 @@ class EASY_EXPORT TcpClient : NonCopyable
      */
     void stop();
 
-    /**
-     * @brief Get the TCP connection to the server.
-     *
-     * @return TcpConnectionPtr
-     */
-    TcpConnectionPtr connection() const
+    // @brief Get the TCP connection to the server.
+    std::shared_ptr<TcpConnection> connection() const
     {
         std::lock_guard<std::mutex> lock(mutex_);
         return connection_;
@@ -107,40 +103,24 @@ class EASY_EXPORT TcpClient : NonCopyable
      * @param cb The callback is called when the connection to the server is
      * established or closed.
      */
-    void setConnectionCallback(const ConnectionCallback &cb)
+    void setConnectionCallback(std::function<void(std::shared_ptr<TcpConnection> const&)> const& cb)
     {
         connectionCallback_ = cb;
     }
-    void setConnectionCallback(ConnectionCallback &&cb)
+    void setConnectionCallback(std::function<void(std::shared_ptr<TcpConnection> const&)> && cb)
     {
         connectionCallback_ = std::move(cb);
     }
 
-    /**
-     * @brief Set the connection error callback.
-     *
-     * @param cb The callback is called when an error occurs during connecting
-     * to the server.
-     */
-    void setConnectionErrorCallback(const ConnectionErrorCallback &cb)
+    // @note The callback is called when an error occurs during connecting to the server.
+    void setConnectionErrorCallback(std::function<void()> const& cb)
     {
         connectionErrorCallback_ = cb;
     }
 
-    /**
-     * @brief Set the message callback.
-     *
-     * @param cb The callback is called when some data is received from the
-     * server.
-     */
-    void setMessageCallback(const RecvMessageCallback &cb)
-    {
-        messageCallback_ = cb;
-    }
-    void setMessageCallback(RecvMessageCallback &&cb)
-    {
-        messageCallback_ = std::move(cb);
-    }
+    // @param cb The callback is called when some data is received from the server.
+    void setMessageCallback(std::function<void(std::shared_ptr<TcpConnection> const&, MsgBuffer*)> const& cb) { messageCallback_ = cb; }
+    void setMessageCallback(std::function<void(std::shared_ptr<TcpConnection> const&, MsgBuffer*)> && cb) { messageCallback_ = std::move(cb); }
     /// Set write complete callback.
     /// Not thread safe.
 
@@ -150,11 +130,11 @@ class EASY_EXPORT TcpClient : NonCopyable
      * @param cb The callback is called when data to send is written to the
      * socket.
      */
-    void setWriteCompleteCallback(const WriteCompleteCallback &cb)
+    void setWriteCompleteCallback(std::function<void(std::shared_ptr<TcpConnection> const&)> const& cb)
     {
         writeCompleteCallback_ = cb;
     }
-    void setWriteCompleteCallback(WriteCompleteCallback &&cb)
+    void setWriteCompleteCallback(std::function<void(std::shared_ptr<TcpConnection> const&)> &&cb)
     {
         writeCompleteCallback_ = std::move(cb);
     }
@@ -191,21 +171,21 @@ class EASY_EXPORT TcpClient : NonCopyable
     /// Not thread safe, but in loop
     void newConnection(int sockfd);
     /// Not thread safe, but in loop
-    void removeConnection(const TcpConnectionPtr &conn);
+    void removeConnection(std::shared_ptr<TcpConnection> const& conn);
 
     EventLoop *loop_;
     ConnectorPtr connector_;  // avoid revealing Connector
     const std::string name_;
-    ConnectionCallback connectionCallback_;
-    ConnectionErrorCallback connectionErrorCallback_;
-    RecvMessageCallback messageCallback_;
-    WriteCompleteCallback writeCompleteCallback_;
+    std::function<void(std::shared_ptr<TcpConnection> const&)> connectionCallback_;
+    std::function<void()>                                      connectionErrorCallback_;
+    std::function<void(std::shared_ptr<TcpConnection> const&, MsgBuffer*)> messageCallback_;
+    std::function<void(std::shared_ptr<TcpConnection> const&)> writeCompleteCallback_;
     SSLErrorCallback sslErrorCallback_;
     std::atomic_bool retry_;    // atomic
     std::atomic_bool connect_;  // atomic
     // always in loop thread
     mutable std::mutex mutex_;
-    TcpConnectionPtr connection_;  // @GuardedBy mutex_
+    std::shared_ptr<TcpConnection> connection_;  // @GuardedBy mutex_
     std::shared_ptr<SSLContext> sslCtxPtr_;
     bool validateCert_{false};
     std::string SSLHostName_;

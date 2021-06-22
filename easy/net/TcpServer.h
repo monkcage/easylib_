@@ -87,11 +87,11 @@ public:
      * @param cb The callback is called when some data is received on a
      * connection to the server.
      */
-    void setRecvMessageCallback(const RecvMessageCallback &cb)
+    void setRecvMessageCallback(std::function<void(std::shared_ptr<TcpConnection> const&, MsgBuffer*)> const& cb)
     {
         recvMessageCallback_ = cb;
     }
-    void setRecvMessageCallback(RecvMessageCallback &&cb)
+    void setRecvMessageCallback(std::function<void(std::shared_ptr<TcpConnection> const&, MsgBuffer*)> &&cb)
     {
         recvMessageCallback_ = std::move(cb);
     }
@@ -102,11 +102,11 @@ public:
      * @param cb The callback is called when a connection is established or
      * closed.
      */
-    void setConnectionCallback(const ConnectionCallback &cb)
+    void setConnectionCallback(std::function<void(std::shared_ptr<TcpConnection> const&)> const& cb)
     {
         connectionCallback_ = cb;
     }
-    void setConnectionCallback(ConnectionCallback &&cb)
+    void setConnectionCallback(std::function<void(std::shared_ptr<TcpConnection> const&)> &&cb)
     {
         connectionCallback_ = std::move(cb);
     }
@@ -117,11 +117,11 @@ public:
      * @param cb The callback is called when data to send is written to the
      * socket of a connection.
      */
-    void setWriteCompleteCallback(const WriteCompleteCallback &cb)
+    void setWriteCompleteCallback(std::function<void(std::shared_ptr<TcpConnection> const&)> const& cb)
     {
         writeCompleteCallback_ = cb;
     }
-    void setWriteCompleteCallback(WriteCompleteCallback &&cb)
+    void setWriteCompleteCallback(std::function<void(std::shared_ptr<TcpConnection> const&)> &&cb)
     {
         writeCompleteCallback_ = std::move(cb);
     }
@@ -203,15 +203,15 @@ public:
     std::unique_ptr<Acceptor> acceptorPtr_;
     void newConnection(int fd, const InetAddress &peer);
     std::string serverName_;
-    std::set<TcpConnectionPtr> connSet_;
+    std::set<std::shared_ptr<TcpConnection>> connSet_;
 
-    RecvMessageCallback recvMessageCallback_;
-    ConnectionCallback connectionCallback_;
-    WriteCompleteCallback writeCompleteCallback_;
+    std::function<void(std::shared_ptr<TcpConnection> const&, MsgBuffer*)> recvMessageCallback_;
+    std::function<void(std::shared_ptr<TcpConnection> const&)> connectionCallback_;
+    std::function<void(std::shared_ptr<TcpConnection> const&)> writeCompleteCallback_;
 
     size_t idleTimeout_{0};
     std::map<EventLoop *, std::shared_ptr<TimingWheel>> timingWheelMap_;
-    void connectionClosed(const TcpConnectionPtr &connectionPtr);
+    void connectionClosed(std::shared_ptr<TcpConnection> const& connectionPtr);
     std::shared_ptr<EventLoopThreadPool> loopPoolPtr_;
 #ifndef _WIN32
     class IgnoreSigPipe
